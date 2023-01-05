@@ -1,37 +1,12 @@
-package main
+package handler
 
 import (
 	"net/http"
 	"strconv"
 
-	"github.com/aldogayala/GoWeb/internal"
+	internal "github.com/aldogayala/GoWeb/internal/domain"
 	"github.com/gin-gonic/gin"
 )
-
-func main() {
-
-	//Init Gin
-	routes := gin.Default()
-
-	//Group routes
-	pingGR := routes.Group("/ping")
-	pingGR.GET("/", GetPong())
-
-	productsGR := routes.Group("/products")
-	productsGR.GET("/", GetProducts())
-	productsGR.GET("/:id", GetProductByID())
-	productsGR.GET("/search/:priceGt", SearchByPrice())
-
-	//Run Server port: 9090
-	routes.Run(":9090")
-
-}
-
-func GetPong() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "Pong")
-	}
-}
 
 func GetProducts() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -82,7 +57,7 @@ func SearchByPrice() gin.HandlerFunc {
 
 		var result []internal.Product
 
-		price, err := strconv.Atoi(ctx.Param("priceGt"))
+		price, err := strconv.ParseFloat(ctx.Param("priceGt"), 64)
 
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
@@ -93,7 +68,7 @@ func SearchByPrice() gin.HandlerFunc {
 		}
 
 		for _, value := range products {
-			if value.Price > float64(price) {
+			if value.Price > price {
 				result = append(result, value)
 			}
 		}
@@ -105,4 +80,10 @@ func SearchByPrice() gin.HandlerFunc {
 
 	}
 
+}
+
+func GetPong() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "Pong")
+	}
 }
