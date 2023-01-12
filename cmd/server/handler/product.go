@@ -5,12 +5,27 @@ import (
 	"strconv"
 
 	internal "github.com/aldogayala/GoWeb/internal/domain"
+	productInternal "github.com/aldogayala/GoWeb/internal/domain/product"
 	"github.com/gin-gonic/gin"
 )
 
-func GetProducts() gin.HandlerFunc {
+type Product struct {
+	sv productInternal.Service
+}
+
+func NewProductHandler(sv productInternal.Service) *Product {
+	return &Product{sv: sv}
+}
+
+func (pr *Product) GetProducts() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		products := internal.LoadData()
+		//request
+
+		//process
+		products, err := pr.sv.Get()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, nil)
+		}
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "All data of products",
 			"data":    products,
@@ -19,9 +34,9 @@ func GetProducts() gin.HandlerFunc {
 	}
 }
 
-func GetProductByID() gin.HandlerFunc {
+func (pr *Product) GetProductByID() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
+		//request
 		id, err := strconv.Atoi(ctx.Param("id"))
 
 		if err != nil {
@@ -32,7 +47,10 @@ func GetProductByID() gin.HandlerFunc {
 			return
 		}
 
-		products := internal.LoadData()
+		products, err := pr.sv.Get()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, nil)
+		}
 
 		var result internal.Product
 		for _, value := range products {
@@ -46,14 +64,18 @@ func GetProductByID() gin.HandlerFunc {
 			"message": "Data of products ByID",
 			"data":    result,
 		})
+
 	}
 }
 
-func SearchByPrice() gin.HandlerFunc {
+func (pr *Product) SearchByPrice() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 
-		products := internal.LoadData()
+		products, err := pr.sv.Get()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, nil)
+		}
 
 		var result []internal.Product
 
@@ -80,6 +102,10 @@ func SearchByPrice() gin.HandlerFunc {
 
 	}
 
+}
+
+func (pr *Product) Create(name string, quantity int, codeValue string, isPublished bool, price float64) gin.HandlerFunc {
+	return func(ctx *gin.Context) {}
 }
 
 func GetPong() gin.HandlerFunc {
